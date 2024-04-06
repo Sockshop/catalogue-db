@@ -1,6 +1,6 @@
 pipeline {
     environment {
-        DOCKER_ID = "kentronic"
+        DOCKER_ID = credentials('DOCKER_ID')
         DOCKER_IMAGE_CATALOGUE_DB = "catalogue-db"
         DOCKER_TAG = "${BUILD_ID}"
         BUILD_AGENT  = ""
