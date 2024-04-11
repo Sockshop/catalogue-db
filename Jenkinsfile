@@ -60,7 +60,7 @@ agent any
                             sh 'kubectl create namespace \$NAMESPACE'
                             echo "Namespace \$NAMESPACE created."
                         }
-                    
+                    //deploy the manifest
                     sh 'kubectl apply -f ./manifests -n $NAMESPACE --kubeconfig .kube/config'
                     
                     sh 'aws configure set output text'
