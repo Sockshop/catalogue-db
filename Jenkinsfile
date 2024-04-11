@@ -45,7 +45,7 @@ agent any
                         sh 'rm -Rf .kube'
                         sh 'mkdir .kube'
                         sh 'touch .kube/config'
-                        sh 'sudo chmod 777 .kube/config'
+                        sh 'chmod 777 .kube/config'
                         sh 'rm -Rf .aws'
                         sh 'mkdir .aws'
                         sh 'aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID'
