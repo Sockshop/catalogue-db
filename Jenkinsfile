@@ -42,14 +42,23 @@ agent any
             steps {
                 script {
                     dir('manifests') {
-                        sh "aws eks update-kubeconfig --name sock-shop-eks --region $AWSREGION"
+                        sh 'rm -Rf .kube'
+                        sh 'mkdir .kube'
+                        sh 'touch .kube/config'
+                        sh 'sudo chmod 777 .kube/config'
+                        sh 'rm -Rf .aws'
+                        sh 'mkdir .aws'
+                        sh 'aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID'
+                        sh 'aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY'
+                        sh 'aws configure set region $AWSREGION'
+                        sh "aws eks update-kubeconfig --name $EKSCLUSTERNAME --region $AWSREGION --kubeconfig .kube/config"
                         // Check if the namespace exists
                         def namespaceExists = sh(script: "kubectl get namespace $NAMESPACE", returnStatus: true)
                         if (namespaceExists == 0) {
                             echo "Namespace '$NAMESPACE' already exists."
                         } else {
                             // Create the namespace
-                            sh "kubectl create namespace $NAMESPACE"
+                            sh 'kubectl create namespace $NAMESPACE'
                             echo "Namespace '$NAMESPACE' created."
                         }
                         
