@@ -31,5 +31,37 @@ agent any
                 sh 'docker push $DOCKER_ID/$DOCKER_IMAGE_CATALOGUE_DB:$DOCKER_TAG && docker push $DOCKER_ID/$DOCKER_IMAGE_CATALOGUE_DB:latest'
             }
         }    
+        stage('Deploy EKS') {
+            environment { // import Jenkin global variables 
+                //KUBECONFIG = credentials("EKS_CONFIG")  
+                AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+                AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+                AWSREGION = "eu-west-3"
+                EKSCLUSTERNAME = credentials("EKS_CLUSTER")
+            }
+            steps {
+                script {
+                    dir('manifests') {
+                        sh "aws eks update-kubeconfig --name sock-shop-eks --region $AWSREGION"
+                        // Check if the namespace exists
+                        def namespaceExists = sh(script: "kubectl get namespace $NAMESPACE", returnStatus: true)
+                        if (namespaceExists == 0) {
+                            echo "Namespace '$NAMESPACE' already exists."
+                        } else {
+                            // Create the namespace
+                            sh "kubectl create namespace $NAMESPACE"
+                            echo "Namespace '$NAMESPACE' created."
+                        }
+                        
+                        sh 'kubectl apply -f ./statefulset.yaml -n $NAMESPACE'
+                        sh 'kubectl apply -f ./service.yaml -n $NAMESPACE'
+                        sh 'aws configure set output text'
+                        sh 'aws eks list-clusters'
+                        sh 'kubectl config view'
+                        sh 'kubectl cluster-info --kubeconfig .kube/config'                
+                    }
+                }
+            }
+        }
     }
 }
